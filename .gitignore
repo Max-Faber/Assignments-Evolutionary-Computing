@@ -1,7 +1,9 @@
 neat-checkpoint-*
+winner.pk1
 winner*
 .idea/
 .vscode/
+NEAT/
 NEAT/
 Graphs/
 Highscores/
@@ -9,3 +11,4 @@ controller_specialist_demo/
 controller_generalist_demo/
 co_demo/
 highest_genome*
+/venv/
