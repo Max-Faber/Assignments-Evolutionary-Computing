@@ -1,0 +1,2 @@
+- Genomes don't evolve after setting 'num_hidden' from 0 to 10
+- Fitness should be based on highest gain in assignment I and is free to choose in assignment II
