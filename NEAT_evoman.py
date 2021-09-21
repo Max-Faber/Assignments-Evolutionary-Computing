@@ -41,6 +41,7 @@ class EvomanNEAT:
                                speed='fastest',
                                playermode='ai',
                                enemymode='static',
+                               player_controller=NEATController(),
                                enemies=[enemy],
                                logs='on')
         self.max_fitness = float('-inf')
@@ -56,8 +57,8 @@ class EvomanNEAT:
             ff_network = neat.nn.FeedForwardNetwork.create(genome, config)
             genome.fitness += self.evaluate(ff_network=ff_network)
             if genome.fitness > self.max_fitness and genome.fitness > 0:
-                highest_fitness = genome.fitness
-                with open(self.high_scores_dir + '/highest_genome({}_gain).pk1'.format(highest_fitness),
+                self.max_fitness = genome.fitness
+                with open(self.high_scores_dir + '/highest_genome({}_gain).pk1'.format(genome.fitness),
                           'wb') as output:
                     pickle.dump(genome, output)
             sim += 1

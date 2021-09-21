@@ -10,7 +10,7 @@ experiments = [
         "name": "NEAT-v1",
         "config-file": "NEAT-configs/config-feedforward-1.txt",
         "3-enemies": [1, 2, 3],
-        "number-of-generations": 1
+        "number-of-generations": 20
     }
     # {
     #     "name": "NEAT-v2",

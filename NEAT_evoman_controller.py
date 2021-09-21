@@ -5,14 +5,14 @@ from controller import Controller
 
 
 class NEATController(Controller):
-    def __init__(self, ff_network):
+    def __init__(self, ff_network=None):
         self.ffNetwork = ff_network
         pass
 
-    def control(self, inputs):
+    def control(self, inputs, controller):
         # Normalises the input using min-max scaling
         inputs = (inputs - min(inputs)) / float((max(inputs) - min(inputs)))
-        output = self.ffNetwork.activate(inputs)
+        output = controller.ffNetwork.activate(inputs)
 
         # takes decisions about sprite actions
         left = 1 if output[0] > 0 else 0
