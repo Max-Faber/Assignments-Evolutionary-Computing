@@ -27,21 +27,30 @@ class NEATController(Controller):
 
 class EvomanNEAT:
 
-    def __init__(self, neat_config, experiment_env, enemy):
+    def __init__(self, neat_config, number_of_gens, experiment_env, enemy):
         if not os.path.exists(experiment_env):
             os.makedirs(experiment_env)
+
         winner_dir = experiment_env + "/winner"
         if not os.path.exists(winner_dir):
             os.makedirs(winner_dir)
         self.winner_file = winner_dir + "/winner.pk1"
+
         self.graphs_dir = experiment_env + "/graphs"
         if not os.path.exists(self.graphs_dir):
             os.makedirs(self.graphs_dir)
+
         self.high_scores_dir = experiment_env + "/highscores"
         if not os.path.exists(self.high_scores_dir):
             os.makedirs(self.high_scores_dir)
+
+        self.check_points_dir = experiment_env + "/checkpoints"
+        if not os.path.exists(self.check_points_dir):
+            os.makedirs(self.check_points_dir)
+
         self.experiment_env = experiment_env
         self.neat_config = neat_config
+        self.number_of_gens = number_of_gens
         self.gen = 0
         self.n_pop = 50
         self.env = Environment(experiment_name=experiment_env,
@@ -85,12 +94,13 @@ class EvomanNEAT:
         # Add a stdout reporter to show progress in the terminal.
         p.add_reporter(neat.StdOutReporter(True))
         p.add_reporter(self.stats)
-        p.add_reporter(neat.Checkpointer(5))
+        p.add_reporter(
+            neat.Checkpointer(min(self.number_of_gens, 5), filename_prefix=self.check_points_dir + '/checkpoint-'))
 
-        winner = p.run(self.eval_genomes, 10)
+        winner = p.run(self.eval_genomes, self.number_of_gens)
         visualize.draw_net(config, winner, view=False, filename=self.graphs_dir + '/network.svg')
         visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
-        visualize.plot_species(self.stats, view=False, filename=self.graphs_dir + '/spediation.svg')
+        visualize.plot_species(self.stats, view=False, filename=self.graphs_dir + '/speciation.svg')
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
@@ -113,12 +123,14 @@ experiments = [
     {
         "name": "NEAT-v1",
         "config-file": "NEAT-configs/config-feedforward-1.txt",
-        "3-enemies": [1, 2, 3]
+        "3-enemies": [1, 2, 3],
+        "number-of-generations": 1
     },
     {
         "name": "NEAT-v2",
         "config-file": "NEAT-configs/config-feedforward-2.txt",
-        "3-enemies": [1, 2, 3]
+        "3-enemies": [1, 2, 3],
+        "number-of-generations": 1
     }
 ]
 
@@ -130,5 +142,11 @@ if __name__ == '__main__':
         print("Running experiment: {}, config file used: {}".format(name, config))
         for enemy in experiment["3-enemies"]:
             env_dir = "NEAT-results/" + name + "/" + dt + "/enemy-" + str(enemy)
-            n = EvomanNEAT(experiment["config-file"], env_dir, enemy)
+            num_gens = experiment["number-of-generations"]
+
+            n = EvomanNEAT(neat_config=experiment["config-file"],
+                           number_of_gens=int(num_gens),
+                           experiment_env=env_dir,
+                           enemy=enemy)
+
             winner = n.run()
