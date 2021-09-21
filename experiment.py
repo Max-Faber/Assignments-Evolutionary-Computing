@@ -88,9 +88,9 @@ class EvomanNEAT:
         p.add_reporter(neat.Checkpointer(5))
 
         winner = p.run(self.eval_genomes, 10)
-        visualize.draw_net(config, winner, True, filename=self.graphs_dir + '/network.svg')
-        visualize.plot_stats(self.stats, ylog=False, view=True, filename=self.graphs_dir + '/avg_fitness.svg')
-        visualize.plot_species(self.stats, view=True, filename=self.graphs_dir + '/spediation.svg')
+        visualize.draw_net(config, winner, view=False, filename=self.graphs_dir + '/network.svg')
+        visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
+        visualize.plot_species(self.stats, view=False, filename=self.graphs_dir + '/spediation.svg')
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
