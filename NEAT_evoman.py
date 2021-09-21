@@ -1,6 +1,9 @@
 import os, sys, neat, NEAT_visualize, pickle
+import shutil
+
 sys.path.insert(0, 'evoman')
 from NEAT_evoman_controller import NEATController
+from shutil import copyfile
 from environment import Environment
 
 
@@ -9,6 +12,8 @@ class EvomanNEAT:
     def __init__(self, neat_config, number_of_gens, experiment_env, enemy):
         if not os.path.exists(experiment_env):
             os.makedirs(experiment_env)
+
+        shutil.copyfile(neat_config, experiment_env + '/neat-config.txt')
 
         winner_dir = experiment_env + "/winner"
         if not os.path.exists(winner_dir):
