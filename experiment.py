@@ -20,11 +20,11 @@ experiments = [
 
 
 class NEATController(Controller):
-    def __init__(self, ffNetwork):
-        self.ffNetwork = ffNetwork
+    def __init__(self, ff_network):
+        self.ffNetwork = ff_network
         pass
 
-    def control(self, inputs, controller):
+    def control(self, inputs):
         # Normalises the input using min-max scaling
         inputs = (inputs - min(inputs)) / float((max(inputs) - min(inputs)))
         output = self.ffNetwork.activate(inputs)
@@ -43,20 +43,28 @@ class EvomanNEAT:
     def __init__(self, neat_config, experiment_env, enemy):
         if not os.path.exists(experiment_env):
             os.makedirs(experiment_env)
-        self.high_scores_dir = experiment_env + "/highscores"
-        if not os.path.exists(self.high_scores_dir):
-            os.makedirs(self.high_scores_dir)
+        winner_dir = experiment_env + "/winner"
+        if not os.path.exists(winner_dir):
+            os.makedirs(winner_dir)
+        self.winner_file = winner_dir + "/winner.pk1"
         self.graphs_dir = experiment_env + "/graphs"
         if not os.path.exists(self.graphs_dir):
             os.makedirs(self.graphs_dir)
+        self.high_scores_dir = experiment_env + "/highscores"
+        if not os.path.exists(self.high_scores_dir):
+            os.makedirs(self.high_scores_dir)
         self.experiment_env = experiment_env
         self.neat_config = neat_config
         self.gen = 0
         self.n_pop = 50
-        self.env = Environment(experiment_name=experiment_env, speed='fastest', playermode='ai', enemymode='static',
-                               enemies=[enemy], logs='on')
+        self.env = Environment(experiment_name=experiment_env,
+                               speed='fastest',
+                               playermode='ai',
+                               enemymode='static',
+                               enemies=[enemy],
+                               logs='on')
         self.max_fitness = float('-inf')
-        self.stats = None
+        self.stats = neat.StatisticsReporter()
         pass
 
     def eval_genomes(self, genomes, config):
@@ -89,7 +97,6 @@ class EvomanNEAT:
 
         # Add a stdout reporter to show progress in the terminal.
         p.add_reporter(neat.StdOutReporter(True))
-        self.stats = neat.StatisticsReporter()
         p.add_reporter(self.stats)
         p.add_reporter(neat.Checkpointer(5))
 
@@ -100,12 +107,14 @@ class EvomanNEAT:
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
-        with open(self.high_scores_dir + '/winner.pk1', 'wb') as output:
+        with open(self.winner_file, 'wb') as output:
             pickle.dump(winner, output)
         return winner
 
-    def play_winning_genome(self, genome_file):
-        with open(genome_file, 'rb') as output:
+    def play_winning_genome(self, winner_file=None):
+        if winner_file is None:
+            winner_file = self.winner_file
+        with open(winner_file, 'rb') as output:
             genome = pickle.load(output)
         ff_network = neat.nn.FeedForwardNetwork.create(genome, self.neat_config)
         self.env.speed = 'normal'
@@ -122,4 +131,4 @@ if __name__ == '__main__':
         for enemy in experiment["3-enemies"]:
             env_dir = "NEAT-results/" + name + "/" + dt + "/enemy-" + str(enemy)
             n = EvomanNEAT(experiment["config-file"], env_dir, enemy)
-            n.run()
+            winner = n.run()
