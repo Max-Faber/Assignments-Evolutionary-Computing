@@ -5,19 +5,6 @@ from controller import Controller
 from environment import Environment
 from time import time, strftime, localtime
 
-experiments = [
-    {
-        "name": "NEAT-v1",
-        "config-file": "NEAT-configs/config-feedforward-1.txt",
-        "3-enemies": [1, 2, 3]
-    },
-    {
-        "name": "NEAT-v2",
-        "config-file": "NEAT-configs/config-feedforward-2.txt",
-        "3-enemies": [1, 2, 3]
-    }
-]
-
 
 class NEATController(Controller):
     def __init__(self, ff_network):
@@ -121,6 +108,19 @@ class EvomanNEAT:
         self.evaluate(ff_network)
         sys.exit()
 
+
+experiments = [
+    {
+        "name": "NEAT-v1",
+        "config-file": "NEAT-configs/config-feedforward-1.txt",
+        "3-enemies": [1, 2, 3]
+    },
+    {
+        "name": "NEAT-v2",
+        "config-file": "NEAT-configs/config-feedforward-2.txt",
+        "3-enemies": [1, 2, 3]
+    }
+]
 
 if __name__ == '__main__':
     dt = strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
