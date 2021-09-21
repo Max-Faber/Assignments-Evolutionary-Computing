@@ -1,28 +1,7 @@
-import os, sys, neat, visualize, pickle
-
+import os, sys, neat, NEAT_visualize, pickle
 sys.path.insert(0, 'evoman')
-from controller import Controller
+from NEAT_evoman_controller import NEATController
 from environment import Environment
-from time import time, strftime, localtime
-
-
-class NEATController(Controller):
-    def __init__(self, ff_network):
-        self.ffNetwork = ff_network
-        pass
-
-    def control(self, inputs):
-        # Normalises the input using min-max scaling
-        inputs = (inputs - min(inputs)) / float((max(inputs) - min(inputs)))
-        output = self.ffNetwork.activate(inputs)
-
-        # takes decisions about sprite actions
-        left = 1 if output[0] > 0 else 0
-        right = 1 if output[1] > 0 else 0
-        jump = 1 if output[2] > 0 else 0
-        shoot = 1 if output[3] > 0 else 0
-        release = 1 if output[4] > 0 else 0
-        return [left, right, jump, shoot, release]
 
 
 class EvomanNEAT:
@@ -78,7 +57,7 @@ class EvomanNEAT:
                     pickle.dump(genome, output)
             sim += 1
             print('Generation: {}, simulation: {}'.format(self.gen, sim))
-        visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
+        NEAT_visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
 
     # runs simulation
     def evaluate(self, ff_network):
@@ -98,9 +77,9 @@ class EvomanNEAT:
             neat.Checkpointer(min(self.number_of_gens, 5), filename_prefix=self.check_points_dir + '/checkpoint-'))
 
         winner = p.run(self.eval_genomes, self.number_of_gens)
-        visualize.draw_net(config, winner, view=False, filename=self.graphs_dir + '/network.svg')
-        visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
-        visualize.plot_species(self.stats, view=False, filename=self.graphs_dir + '/speciation.svg')
+        NEAT_visualize.draw_net(config, winner, view=False, filename=self.graphs_dir + '/network.svg')
+        NEAT_visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
+        NEAT_visualize.plot_species(self.stats, view=False, filename=self.graphs_dir + '/speciation.svg')
 
         # Display the winning genome.
         print('\nBest genome:\n{!s}'.format(winner))
@@ -117,36 +96,3 @@ class EvomanNEAT:
         self.env.speed = 'normal'
         self.evaluate(ff_network)
         sys.exit()
-
-
-experiments = [
-    {
-        "name": "NEAT-v1",
-        "config-file": "NEAT-configs/config-feedforward-1.txt",
-        "3-enemies": [1, 2, 3],
-        "number-of-generations": 1
-    },
-    {
-        "name": "NEAT-v2",
-        "config-file": "NEAT-configs/config-feedforward-2.txt",
-        "3-enemies": [1, 2, 3],
-        "number-of-generations": 1
-    }
-]
-
-if __name__ == '__main__':
-    dt = strftime("%d_%m_%Y_%H_%M_%S", localtime(time()))
-    for experiment in experiments:
-        name = experiment["name"]
-        config = experiment["config-file"]
-        print("Running experiment: {}, config file used: {}".format(name, config))
-        for enemy in experiment["3-enemies"]:
-            env_dir = "NEAT-results/" + name + "/" + dt + "/enemy-" + str(enemy)
-            num_gens = experiment["number-of-generations"]
-
-            n = EvomanNEAT(neat_config=experiment["config-file"],
-                           number_of_gens=int(num_gens),
-                           experiment_env=env_dir,
-                           enemy=enemy)
-
-            winner = n.run()
