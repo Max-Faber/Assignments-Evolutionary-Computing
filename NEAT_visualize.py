@@ -8,6 +8,43 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def plot_individual_avg_fitness(experiment_name, fitnesses, view=False, filename='avg_individual_fitness.svg'):
+    if plt is None:
+        warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
+        return
+    plt.boxplot(fitnesses)
+    plt.title("Average fitness (IG) best individual ({} runs)".format(len(fitnesses)))
+    plt.ylabel('Individual gain')
+    plt.grid()
+    plt.xlabel(experiment_name)
+    plt.legend(loc="best")
+    plt.savefig(filename)
+    if view:
+        plt.show()
+    plt.close()
+
+
+def plot_fitnesses(avg_fitnesses, max_fitnesses, view=False, filename='fitnesses.svg'):
+    if plt is None:
+        warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
+        return
+    generation = range(len(avg_fitnesses))
+
+    plt.plot(generation, map(lambda x: sum(x) / len(x), avg_fitnesses), 'b-', label="average")
+    plt.plot(generation, map(max, max_fitnesses), 'r-', label="best")
+
+    plt.title("Population's average and best fitness")
+    plt.xlabel("Generation")
+    plt.ylabel("Fitness")
+    plt.grid()
+    plt.legend(loc="best")
+    plt.savefig(filename)
+    if view:
+        plt.show()
+
+    plt.close()
+
+
 def plot_stats(statistics, ylog=False, view=False, filename='avg_fitness.svg'):
     """ Plots the population's average and best fitness. """
     if plt is None:
@@ -182,7 +219,7 @@ def draw_net(config, genome, view=False, filename=None, node_names=None, show_di
 
     for cg in genome.connections.values():
         if cg.enabled or show_disabled:
-            #if cg.input not in used_nodes or cg.output not in used_nodes:
+            # if cg.input not in used_nodes or cg.output not in used_nodes:
             #    continue
             input, output = cg.key
             a = node_names.get(input, str(input))
