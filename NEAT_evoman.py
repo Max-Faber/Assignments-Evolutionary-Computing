@@ -43,9 +43,11 @@ class EvomanNEAT:
                                enemymode='static',
                                player_controller=NEATController(),
                                enemies=[enemy],
-                               logs='on')
+                               logs='on',
+                               randomini='yes')
         self.max_fitness = float('-inf')
         self.stats = neat.StatisticsReporter()
+        self.config = None
         pass
 
     def eval_genomes(self, genomes, config):
@@ -56,7 +58,7 @@ class EvomanNEAT:
             genome.fitness = 0.0
             ff_network = neat.nn.FeedForwardNetwork.create(genome, config)
             genome.fitness += self.evaluate(ff_network=ff_network)
-            if genome.fitness > self.max_fitness and genome.fitness > 0:
+            if genome.fitness > self.max_fitness:
                 self.max_fitness = genome.fitness
                 with open(self.high_scores_dir + '/highest_genome({}_gain).pk1'.format(genome.fitness),
                           'wb') as output:
@@ -71,10 +73,10 @@ class EvomanNEAT:
         return p - e  # individual gain used as fitness
 
     def run(self):
-        config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                             neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                             self.neat_config)
-        p = neat.Population(config)
+        self.config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                                  neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                                  self.neat_config)
+        p = neat.Population(self.config)
 
         # Add a stdout reporter to show progress in the terminal.
         p.add_reporter(neat.StdOutReporter(True))
@@ -83,7 +85,8 @@ class EvomanNEAT:
             neat.Checkpointer(min(self.number_of_gens, 5), filename_prefix=self.check_points_dir + '/checkpoint-'))
 
         winner = p.run(self.eval_genomes, self.number_of_gens)
-        NEAT_visualize.draw_net(config, winner, view=False, filename=self.graphs_dir + '/network.svg')
+        # self.play_winning_genome('NEAT-results/NEAT-v1-21_09_2021_15_42_26/round-1/enemy-3/highscores/highest_genome(46.0_gain).pk1')
+        NEAT_visualize.draw_net(self.config, winner, view=False, filename=self.graphs_dir + '/network.svg')
         NEAT_visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
         NEAT_visualize.plot_species(self.stats, view=False, filename=self.graphs_dir + '/speciation.svg')
 
@@ -98,7 +101,7 @@ class EvomanNEAT:
             winner_file = self.winner_file
         with open(winner_file, 'rb') as output:
             genome = pickle.load(output)
-        ff_network = neat.nn.FeedForwardNetwork.create(genome, self.neat_config)
+        ff_network = neat.nn.FeedForwardNetwork.create(genome, self.config)
         self.env.speed = 'normal'
         self.evaluate(ff_network)
         sys.exit()
