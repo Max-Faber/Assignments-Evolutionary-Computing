@@ -6,6 +6,9 @@ import warnings
 import graphviz
 import matplotlib.pyplot as plt
 import numpy as np
+import statistics
+
+from numpy.core.fromnumeric import std
 
 
 def plot_individual_avg_fitness(experiment_name, fitnesses, view=False, filename='avg_individual_fitness.svg'):
@@ -29,19 +32,25 @@ def plot_fitnesses(avg_fitnesses, max_fitnesses, view=False, filename='fitnesses
         warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
         return
     generation = range(len(avg_fitnesses))
+    mean_per_gen = [float(sum(l))/len(l) for l in avg_fitnesses]
+    std_per_gen = [float(statistics.stdev(l)) for l in avg_fitnesses]
 
-    plt.plot(generation, map(lambda x: sum(x) / len(x), avg_fitnesses), 'b-', label="average")
-    plt.plot(generation, map(max, max_fitnesses), 'r-', label="best")
+    plt.plot(generation, mean_per_gen, 'b-', label="average")
+    plt.plot(generation, list(map(max, max_fitnesses)), 'r-', label="best")
 
     plt.title("Population's average and best fitness")
     plt.xlabel("Generation")
     plt.ylabel("Fitness")
     plt.grid()
     plt.legend(loc="best")
-    plt.savefig(filename)
+
+    mean_minus_std = [float(j - std_per_gen[i]) for i,j in enumerate(mean_per_gen)]
+    mean_plus_std = [float(j + std_per_gen[i]) for i,j in enumerate(mean_per_gen)]
+    plt.fill_between(generation, mean_minus_std, mean_plus_std, alpha = 0.5)
     if view:
         plt.show()
 
+    plt.savefig(filename)
     plt.close()
 
 

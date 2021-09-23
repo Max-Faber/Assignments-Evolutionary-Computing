@@ -33,7 +33,7 @@ class EvomanNEAT:
         self.number_of_gens = number_of_gens
         self.gen = 0
         self.env = Environment(experiment_name=experiment_env, speed='fastest', playermode='ai', enemymode='static',
-                               player_controller=NEATController(), enemies=[enemy], logs='on')
+                               player_controller=NEATController(), enemies=[enemy], logs='on', randomini='yes')
         self.max_fitness = float('-inf')
         self.stats = neat.StatisticsReporter()
 
