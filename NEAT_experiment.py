@@ -5,7 +5,7 @@ from time import time, strftime, localtime
 from NEAT_evoman import EvomanNEAT
 import NEAT_visualize
 
-number_of_rounds = 2
+number_of_rounds = 10
 experiments = [
     {
         "name": "NEAT-v1",
