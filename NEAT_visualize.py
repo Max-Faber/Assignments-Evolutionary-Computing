@@ -31,22 +31,31 @@ def plot_fitnesses(avg_fitnesses, max_fitnesses, view=False, filename='fitnesses
     if plt is None:
         warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
         return
-    generation = range(len(avg_fitnesses))
-    mean_per_gen = [float(sum(l))/len(l) for l in avg_fitnesses]
-    std_per_gen = [float(statistics.stdev(l)) for l in avg_fitnesses]
 
-    plt.plot(generation, mean_per_gen, 'b-', label="average")
-    plt.plot(generation, list(map(max, max_fitnesses)), 'r-', label="best")
+    generation      = range(len(avg_fitnesses))
 
-    plt.title("Population's average and best fitness")
+    mean_per_gen    = [float(sum(l)) / len(l) for l in avg_fitnesses]
+    plt.plot(generation, mean_per_gen, 'b-', label="Mean")
+
+    max_per_gen     = list(map(max, max_fitnesses))
+    plt.plot(generation, max_per_gen, 'r-', label="Max.")
+
+    plt.title("Population's mean and maximum fitness")
     plt.xlabel("Generation")
     plt.ylabel("Fitness")
     plt.grid()
     plt.legend(loc="best")
 
-    mean_minus_std = [float(j - std_per_gen[i]) for i,j in enumerate(mean_per_gen)]
-    mean_plus_std = [float(j + std_per_gen[i]) for i,j in enumerate(mean_per_gen)]
+    std_per_gen_mean    = [float(statistics.stdev(l))       for l in avg_fitnesses]
+    mean_minus_std      = [float(j - std_per_gen_mean[i])   for i, j in enumerate(mean_per_gen)]
+    mean_plus_std       = [float(j + std_per_gen_mean[i])   for i, j in enumerate(mean_per_gen)]
     plt.fill_between(generation, mean_minus_std, mean_plus_std, alpha = 0.5)
+
+    std_per_gen_max     = [float(statistics.stdev(l))       for l in max_fitnesses]
+    max_minus_std       = [float(j - std_per_gen_max[i])    for i, j in enumerate(max_per_gen)]
+    max_plus_std        = [float(j + std_per_gen_max[i])    for i, j in enumerate(max_per_gen)]
+    plt.fill_between(generation, max_minus_std, max_plus_std, alpha = 0.5)
+
     if view:
         plt.show()
 
