@@ -4,3 +4,4 @@ graphviz
 matplotlib
 environment
 neat-python
+statistics
