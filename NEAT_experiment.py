@@ -1,11 +1,14 @@
-import sys, shutil, os, pickle, numpy
+import sys, shutil, os, pickle, numpy, warnings
 
 sys.path.insert(0, 'evoman')
 from time import time, strftime, localtime
 from NEAT_evoman import EvomanNEAT
 import NEAT_visualize
 
-number_of_rounds = 10
+headless = True
+if headless:
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+number_of_rounds = 1
 experiments = [
     # {
     #     "name": "NEAT-v1",
@@ -14,13 +17,13 @@ experiments = [
     #     "number-of-generations": 30,
     #     "best-genome-test-quantity": 5
     # }#,
-    {
-        "name": "NEAT-v1",
-        "neat-config-file": "NEAT-configs/config-feedforward-1.txt",
-        "enemies": [2],
-        "number-of-generations": 30,
-        "best-genome-test-quantity": 5
-    }
+    # {
+    #     "name": "NEAT-no-feedforward",
+    #     "neat-config-file": "NEAT-configs/config-feedforward-no-feedforward.txt",
+    #     "enemies": [1],
+    #     "number-of-generations": 15,
+    #     "best-genome-test-quantity": 5
+    # },
     # {
     #     "name": "NEAT-v1",
     #     "neat-config-file": "NEAT-configs",
@@ -99,5 +102,11 @@ class Experiment:
 
 
 if __name__ == '__main__':
+    args = sys.argv
+    print (args)
+    if len(args) == 0:
+        warnings.warn("No experiment names were given. Assuming all experiments have to be performed...")
+        warnings.warn("You can run specific experiments by calling 'python [name_of_file.py] exp_1 exp_2 exp_3'.")
     for experiment in experiments:
-        Experiment(experiment).run()
+        if args.__contains__(experiment["name"]) or len(args) == 0:
+            Experiment(experiment).run()
