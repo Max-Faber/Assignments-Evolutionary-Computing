@@ -8,8 +8,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import statistics
 
-from numpy.core.fromnumeric import std
-
 
 def plot_individual_avg_fitness(experiment_name, fitnesses, view=False, filename='avg_individual_fitness.svg'):
     if plt is None:
@@ -46,15 +44,17 @@ def plot_fitnesses(avg_fitnesses, max_fitnesses, view=False, filename='fitnesses
     plt.grid()
     plt.legend(loc="best")
 
-    std_per_gen_mean    = [float(statistics.stdev(l))       for l in avg_fitnesses]
-    mean_minus_std      = [float(j - std_per_gen_mean[i])   for i, j in enumerate(mean_per_gen)]
-    mean_plus_std       = [float(j + std_per_gen_mean[i])   for i, j in enumerate(mean_per_gen)]
-    plt.fill_between(generation, mean_minus_std, mean_plus_std, alpha = 0.5)
+    if len(avg_fitnesses) >= 2: # Otherwise statistics.stdev() throws an exception
+        std_per_gen_mean    = [float(statistics.stdev(l))       for l in avg_fitnesses]
+        mean_minus_std      = [float(j - std_per_gen_mean[i])   for i, j in enumerate(mean_per_gen)]
+        mean_plus_std       = [float(j + std_per_gen_mean[i])   for i, j in enumerate(mean_per_gen)]
+        plt.fill_between(generation, mean_minus_std, mean_plus_std, alpha = 0.5)
 
-    std_per_gen_max     = [float(statistics.stdev(l))       for l in max_fitnesses]
-    max_minus_std       = [float(j - std_per_gen_max[i])    for i, j in enumerate(max_per_gen)]
-    max_plus_std        = [float(j + std_per_gen_max[i])    for i, j in enumerate(max_per_gen)]
-    plt.fill_between(generation, max_minus_std, max_plus_std, alpha = 0.5)
+    if len(max_fitnesses) >= 2: # Otherwise statistics.stdev() throws an exception
+        std_per_gen_max     = [float(statistics.stdev(l))       for l in max_fitnesses]
+        max_minus_std       = [float(j - std_per_gen_max[i])    for i, j in enumerate(max_per_gen)]
+        max_plus_std        = [float(j + std_per_gen_max[i])    for i, j in enumerate(max_per_gen)]
+        plt.fill_between(generation, max_minus_std, max_plus_std, alpha = 0.5)
 
     if view:
         plt.show()
