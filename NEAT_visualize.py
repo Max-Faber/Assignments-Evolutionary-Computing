@@ -24,6 +24,23 @@ def plot_individual_avg_fitness(experiment_name, fitnesses, view=False, filename
         plt.show()
     plt.close()
 
+def plot_individuals_avg_fitness(fitnesses_two_dimensional, box_names, view=False, filename='avg_individuals_fitness.svg'):
+    if plt is None:
+        warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
+        return
+    if len(fitnesses_two_dimensional) < 1:
+        return
+    fig, ax = plt.subplots()
+    ax.boxplot(fitnesses_two_dimensional)
+    ax.set_xticklabels(box_names)
+    plt.title("Average fitness (IG) best individual ({} runs)".format(len(fitnesses_two_dimensional[0])))
+    plt.ylabel('Individual gain')
+    plt.grid()
+    plt.legend(loc="best")
+    plt.savefig(filename)
+    if view:
+        plt.show()
+    plt.close()
 
 def plot_fitnesses(avg_fitnesses, max_fitnesses, view=False, filename='fitnesses.svg'):
     if plt is None:
