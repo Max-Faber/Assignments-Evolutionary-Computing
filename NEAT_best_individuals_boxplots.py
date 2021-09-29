@@ -1,4 +1,5 @@
 import os, sys, neat, pickle, NEAT_visualize, statistics
+from scipy import stats
 from matplotlib.pyplot import box
 from time import time, strftime, localtime
 from NEAT_evoman_controller import NEATController
@@ -47,7 +48,7 @@ class ExperimentNEAT:
         for _ in range(test_quantity):
             f, p, e, t = self.env.play(neat_controller)
             fitnesses.append(p - e)
-        return sum(fitnesses) / len(fitnesses)
+        return sum(fitnesses) / len(fitnesses) # Calculate the mean of fitnesses
 
 class IndividualComparer:
     def __init__(self, enemy, individuals_to_compare, results_base_path, test_quantity):
@@ -66,21 +67,29 @@ class IndividualComparer:
         mean_fitnesses_per_individual   = []
         box_names                       = []
 
+        if len(self.individuals_to_compare) != 2:
+            return # Otherwise we can't perform a statistical t-test
         for individual_to_compare in self.individuals_to_compare:
             mean_fitnesses_per_individual.append(individual_to_compare.eval_genomes(test_quantity))
             box_names.append(individual_to_compare.name)
         NEAT_visualize.plot_individuals_avg_fitness(fitnesses_two_dimensional=mean_fitnesses_per_individual,
                                                     box_names=box_names,
                                                     filename=f'{self.output_dir}/best_individuals_enemy-{self.enemy}_boxplot.svg')
+        t_test = stats.ttest_ind(mean_fitnesses_per_individual[0], mean_fitnesses_per_individual[1])
         with open(f'{self.output_dir}/statistics.json', 'w') as output:
-            stats = []
-            for i in range(len(self.individuals_to_compare)):
-                stats.append({
-                    "name": self.individuals_to_compare[i].name,
-                    "std_of_means": statistics.stdev(mean_fitnesses_per_individual[i]),
-                    "mean_of_means": sum(mean_fitnesses_per_individual[i]) / len(mean_fitnesses_per_individual[i])
+            comapre_stats = []
+            for individual_to_compare, mean_fitness in zip(self.individuals_to_compare, mean_fitnesses_per_individual):
+                comapre_stats.append({
+                    "name": individual_to_compare.name,
+                    "enemy": self.enemy,
+                    "std_of_means": statistics.stdev(mean_fitness),
+                    "mean_of_means": sum(mean_fitness) / len(mean_fitness),
+                    "independent_t_test": {
+                        "statistic": t_test.statistic,
+                        "pvalue": t_test.pvalue
+                    }
                 })
-            output.write(str(stats).replace('\'', '\"'))
+            output.write(str(comapre_stats).replace('\'', '\"'))
     
     def eval_genome(self, genome, config, env_speed='fastest'):
         with open(self.path, 'rb') as output:
@@ -93,25 +102,33 @@ class IndividualComparer:
 if __name__ == '__main__':
     final_results           = 'NEAT-final-results'
     results_base_path       = f'{final_results}/Comparisons'
-    enemy                   = 2
+    enemy                   = 8
     test_quantity           = 5 # Number of games of which the mean will be taken
     individuals_to_compare  = []
 
     # Enemy 2
-    individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA1/NEAT-v1-23_09_2021_18_47_15',
-                                                 enemy=enemy,
-                                                 name='NEAT-v1'))
-    individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA2/NEAT-v2-27_09_2021_21_25_11',
-                                                 enemy=enemy,
-                                                 name='NEAT-v2'))
-
-    # Enemy 8
-    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA1/NEAT-v1-23_09_2021_23_48_20',
+    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA1/NEAT-v1-23_09_2021_18_47_15',
     #                                              enemy=enemy,
     #                                              name='NEAT-v1'))
-    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA2/NEAT-v2-27_09_2021_20_55_36',
+    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA2/NEAT-v2-27_09_2021_21_25_11',
     #                                              enemy=enemy,
     #                                              name='NEAT-v2'))
+
+    # Enemy 5
+    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA1/NEAT-v1-28_09_2021_11_30_41',
+    #                                              enemy=enemy,
+    #                                              name='NEAT-v1'))
+    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA2/NEAT-v2-28_09_2021_10_45_31',
+    #                                              enemy=enemy,
+    #                                              name='NEAT-v2'))
+
+    # Enemy 8
+    individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA1/NEAT-v1-23_09_2021_23_48_20',
+                                                 enemy=enemy,
+                                                 name='NEAT-v1'))
+    individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/EA2/NEAT-v2-27_09_2021_20_55_36',
+                                                 enemy=enemy,
+                                                 name='NEAT-v2'))
 
     IndividualComparer(enemy=enemy,
                        individuals_to_compare=individuals_to_compare,

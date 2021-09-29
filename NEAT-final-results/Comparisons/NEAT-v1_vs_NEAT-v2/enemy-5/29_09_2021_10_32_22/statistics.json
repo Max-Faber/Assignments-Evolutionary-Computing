@@ -1,0 +1,22 @@
+[
+    {
+        "name": "NEAT-v1",
+        "enemy": 5,
+        "std_of_means": 40.177584684885105,
+        "mean_of_means": 51.34000000000017,
+        "independent_t_test": {
+            "statistic": 0.420457484869041,
+            "pvalue": 0.6791281307526034
+        }
+    },
+        {
+            "name": "NEAT-v2",
+            "enemy": 5,
+            "std_of_means": 49.803163844166484,
+            "mean_of_means": 42.83200000000017,
+            "independent_t_test": {
+                "statistic": 0.420457484869041,
+                "pvalue": 0.6791281307526034
+            }
+        }
+]
