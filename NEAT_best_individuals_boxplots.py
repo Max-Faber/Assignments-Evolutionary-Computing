@@ -90,14 +90,6 @@ class IndividualComparer:
                     }
                 })
             output.write(str(comapre_stats).replace('\'', '\"'))
-    
-    def eval_genome(self, genome, config, env_speed='fastest'):
-        with open(self.path, 'rb') as output:
-            genome = pickle.load(output)
-        ff_network = neat.nn.FeedForwardNetwork.create(genome, config)
-        self.env.speed = env_speed
-        f, p, e, t = self.env.play(NEATController(ff_network))
-        return p - e  # individual gain as fitness
 
 if __name__ == '__main__':
     final_results           = 'NEAT-final-results'
