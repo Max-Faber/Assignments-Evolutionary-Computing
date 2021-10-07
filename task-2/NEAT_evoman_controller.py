@@ -5,11 +5,14 @@ from controller import Controller
 
 
 class NEATController(Controller):
-    def __init__(self, ff_network=None):
+    def __init__(self, ff_network=None, enemy_hint=None):
         self.ffNetwork = ff_network
+        self.enemy_hint = enemy_hint
         pass
 
     def control(self, inputs, controller):
+        if self.enemy_hint is not None:
+            inputs.insert(0, self.enemy_hint)
         # Normalises the input using min-max scaling
         inputs = (inputs - min(inputs)) / float((max(inputs) - min(inputs)))
         output = controller.ffNetwork.activate(inputs)
