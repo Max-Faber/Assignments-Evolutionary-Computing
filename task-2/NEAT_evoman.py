@@ -64,7 +64,7 @@ class EvomanNEAT:
         for e in enemies:
             controller = NEATController(ff_network, enemy_hint=None if not self.enable_enemy_hint else e)
             f, p, e, t = self.make_env_for_enemy(e, env_speed).play(controller)
-            fitnesses.append(p - e)
+            fitnesses.append(f)
         return numpy.mean(fitnesses) - numpy.std(fitnesses)
 
     @staticmethod
