@@ -111,4 +111,4 @@ class EvomanNEAT:
         print('\nBest genome:\n{!s}'.format(winner))
         with open(self.winner_file, 'wb') as output:
             pickle.dump(winner, output)
-        return winner, winner.fitness
+        return winner, self.eval_genome(winner, self.enemies)
