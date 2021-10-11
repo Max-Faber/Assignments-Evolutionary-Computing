@@ -3,7 +3,7 @@ import os, sys, neat, NEAT_visualize, pickle, numpy
 sys.path.insert(0, 'evoman')
 from NEAT_evoman_controller import NEATController
 from environment import Environment
-
+from archive.demo_controller import player_controller
 
 class EvomanNEAT:
 
@@ -45,7 +45,8 @@ class EvomanNEAT:
         sim = 0
         all_fitness = []
         for _, genome in genomes:
-            genome.fitness = self.eval_genome(genome, cfg, enemies=self.enemies)
+            fitnesses = self.eval_genome(genome, enemies=self.enemies)
+            genome.fitness = numpy.mean(list(fitnesses.values())) - numpy.std(list(fitnesses.values()))
             all_fitness.append(genome.fitness)
             if genome.fitness > self.max_fitness and genome.fitness > 0:
                 self.max_fitness = genome.fitness
@@ -57,22 +58,29 @@ class EvomanNEAT:
         self.fitnesses_per_gen.append(all_fitness)
         NEAT_visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
 
-    def eval_genome(self, genome, config, enemies, env_speed='fastest'):
-        ff_network = neat.nn.FeedForwardNetwork.create(genome, config)
-        fitnesses = []
-        # play against all configured enemies with the same genome instance (generalist)
-        for e in enemies:
-            controller = NEATController(ff_network, enemy_hint=None if not self.enable_enemy_hint else e)
-            f, p, e, t = self.make_env_for_enemy(e, env_speed).play(controller)
-            fitnesses.append(f)
-        return numpy.mean(fitnesses) - numpy.std(fitnesses)
-
+    # NN structure, based on control() in demo_controller.py:
+    # bias1:    0   t/m 9   ->  10 weights
+    # weights1: 10  t/m 209 -> 200 weights
+    # bias2:    210 t/m 214 ->   5 weights
+    # weights2: 215 t/m 264 ->  50 weights
     @staticmethod
     def weights_from_genome(genome):
-        weights = []
-        for c in genome.connections.values():
-            weights.append(c.weight)
-        return weights
+        weights = [None] * 265  # NN has 265 weights in total
+
+        for i, n in enumerate(genome.nodes.values()):
+            weights[i if i <= 9 else i + 210 - 10] = n.bias
+        for i, c in enumerate(genome.connections.values()):
+            weights[(i + 10) if (i + 10) <= 209 else (i + 10) + 5] = c.weight
+        return numpy.array(weights)
+
+    def eval_genome(self, genome, enemies, env_speed='fastest'):
+        # ff_network = neat.nn.FeedForwardNetwork.create(genome, config)
+        fitnesses = {}
+        # play against all configured enemies with the same genome instance (generalist)
+        for e in enemies:
+            f, p, _, t = self.make_env_for_enemy(e, env_speed).play(pcont=self.weights_from_genome(genome))
+            fitnesses[str(e)] = f
+        return fitnesses
 
     def neat_config(self):
         return neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
@@ -81,7 +89,8 @@ class EvomanNEAT:
 
     def make_env_for_enemy(self, enemy, env_speed='fastest'):
         return Environment(experiment_name=self.experiment_env, speed=env_speed, playermode='ai', enemymode='static',
-                           player_controller=NEATController(), enemies=[enemy], logs='on', randomini='yes')
+                           player_controller=player_controller(_n_hidden=10), enemies=[enemy], logs='on',
+                           randomini='yes')
 
     def run(self):
         config = self.neat_config()
@@ -102,4 +111,4 @@ class EvomanNEAT:
         print('\nBest genome:\n{!s}'.format(winner))
         with open(self.winner_file, 'wb') as output:
             pickle.dump(winner, output)
-        return winner, self.eval_genome(winner, self.neat_config(), self.enemies)
+        return winner, self.eval_genome(winner, self.enemies)

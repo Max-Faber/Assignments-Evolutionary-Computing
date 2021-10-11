@@ -1,25 +1,25 @@
 [NEAT]
 fitness_criterion     = max
 fitness_threshold     = 100
-pop_size              = 10
+pop_size              = 50
 reset_on_extinction   = False
 
 [DefaultGenome]
 # node activation options
-activation_default      = tanh
+activation_default      = sigmoid
 activation_mutate_rate  = 0.0
-activation_options      = tanh
+activation_options      = sigmoid
 
 # node aggregation options
-aggregation_default     = sum
+aggregation_default     = product
 aggregation_mutate_rate = 0.0
-aggregation_options     = sum
+aggregation_options     = product
 
 # node bias options
 bias_init_mean          = 0.0
 bias_init_stdev         = 1.0
-bias_max_value          = 30.0
-bias_min_value          = -30.0
+bias_max_value          = 1.0
+bias_min_value          = -1.0
 bias_mutate_power       = 0.5
 bias_mutate_rate        = 0.7
 bias_replace_rate       = 0.1
@@ -34,10 +34,10 @@ conn_delete_prob        = 0.0
 
 # connection enable options
 enabled_default         = True
-enabled_mutate_rate     = 0.00
+enabled_mutate_rate     = 0.01
 
 feed_forward            = True
-initial_connection      = full
+initial_connection      = full_nodirect
 
 # node add/remove rates
 node_add_prob           = 0.0
@@ -51,8 +51,8 @@ num_outputs             = 5
 # node response options
 response_init_mean      = 1.0
 response_init_stdev     = 0.0
-response_max_value      = 30.0
-response_min_value      = -30.0
+response_max_value      = 1.0
+response_min_value      = -1.0
 response_mutate_power   = 0.0
 response_mutate_rate    = 0.0
 response_replace_rate   = 0.0
@@ -60,19 +60,19 @@ response_replace_rate   = 0.0
 # connection weight options
 weight_init_mean        = 0.0
 weight_init_stdev       = 1.0
-weight_max_value        = 30
-weight_min_value        = -30
+weight_max_value        = 1
+weight_min_value        = -1.0
 weight_mutate_power     = 0.5
 weight_mutate_rate      = 0.8
 weight_replace_rate     = 0.1
 
 [DefaultSpeciesSet]
-compatibility_threshold = 1.9
+compatibility_threshold = 3.45
 
 [DefaultStagnation]
 species_fitness_func = max
 max_stagnation       = 15
-species_elitism      = 0
+species_elitism      = 6
 
 [DefaultReproduction]
 elitism            = 0

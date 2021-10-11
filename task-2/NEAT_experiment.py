@@ -3,6 +3,7 @@ import sys, shutil, os, pickle, numpy, warnings
 sys.path.insert(0, 'evoman')
 from time import time, strftime, localtime
 from NEAT_evoman import EvomanNEAT
+from NEAT_evoman_controller import NEATController
 import NEAT_visualize
 
 headless = True
@@ -13,8 +14,8 @@ experiments = [
     {
         "name": "NEAT-v1",
         "neat-config-file": "NEAT-configs/config-feedforward-1.txt",
-        "enemies": [2, 3],
-        "number-of-generations": 1,
+        "enemies": [1, 2, 3],#, 4, 5, 6, 7, 8],
+        "number-of-generations": 20,
         "best-genome-test-quantity": 5,
         "enable-enemy-hint": False
     }
@@ -46,7 +47,7 @@ class Experiment:
         # per round the avg per gen [[10.4, 11.9, 9.9, ..., n-rounds], [...], ..., n-gens]
         avg_fitness_per_gen = [[] for _ in range(self.num_gens)]
         best_individual_mean_fitnesses = []  # = avg fitness best genome each round -> [80.2, 72.3, ... n-rounds]
-        winner_of_winners = {"genome": None, "fitness": -100}
+        winner_of_winners = {"genome": None, "fitness": -100, "enemie_fitnesses": {} }
         for i in range(number_of_rounds):
             enemy_round_env = self.base_env + "/round-" + str(i + 1)
 
@@ -57,12 +58,16 @@ class Experiment:
                            enable_enemy_hint=self.enable_enemy_hint)
 
             winner, fitness = n.run()
-            if fitness > winner_of_winners["fitness"]:
-                winner_of_winners["fitness"] = fitness
+            mean_std_fitness = numpy.mean(list(fitness.values())) - numpy.std(list(fitness.values()))
+            if mean_std_fitness > winner_of_winners["fitness"]:
+                winner_of_winners["fitness"] = mean_std_fitness
                 winner_of_winners["genome"] = winner
+                winner_of_winners["enemie_fitnesses"] = fitness
             fitnesses = []
             for _ in range(self.best_genome_test_qt):
-                fitnesses.append(n.eval_genome(winner, n.neat_config(), self.enemies))
+                eval_fitnesses = n.eval_genome(winner, self.enemies)
+                fitnesses.append(numpy.mean(list(eval_fitnesses.values())) - numpy.std(list(eval_fitnesses.values())))
+
 
             best_individual_mean_fitnesses.append(sum(fitnesses) / len(fitnesses))
 
@@ -75,7 +80,9 @@ class Experiment:
         with open(winner_name + ".pk1", 'wb') as output:
             pickle.dump(winner_of_winners["genome"], output)
 
-        numpy.savetxt(winner_name + 'weights.txt', EvomanNEAT.weights_from_genome(winner_of_winners["genome"]))
+        numpy.savetxt(winner_name + 'weights.txt', NEATController.weights_from_genome(winner_of_winners["genome"]))
+        with open(winner_name + 'enemie_fitnesses.json', 'w') as output:
+            output.write(str(winner_of_winners["enemie_fitnesses"]).replace('\'', '\"'))
 
         NEAT_visualize.plot_individual_avg_fitness(self.name,
                                                    best_individual_mean_fitnesses,
