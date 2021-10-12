@@ -35,6 +35,7 @@ class EvomanNEAT:
         self.enemies = enemies
         self.gen = 0
         self.max_fitness = float('-inf')
+        self.fitnesses = []
         self.stats = neat.StatisticsReporter()
         self.fitnesses_per_gen = []
         pass
@@ -50,6 +51,7 @@ class EvomanNEAT:
             all_fitness.append(genome.fitness)
             if genome.fitness > self.max_fitness and genome.fitness > 0:
                 self.max_fitness = genome.fitness
+                self.fitnesses = fitnesses
                 with open(self.high_scores_dir + '/highest_genome({:.1f}_fitness).pk1'.format(genome.fitness),
                           'wb') as output:
                     pickle.dump(genome, output)
@@ -111,4 +113,4 @@ class EvomanNEAT:
         print('\nBest genome:\n{!s}'.format(winner))
         with open(self.winner_file, 'wb') as output:
             pickle.dump(winner, output)
-        return winner, self.eval_genome(winner, self.enemies)
+        return winner, self.fitnesses
