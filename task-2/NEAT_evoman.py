@@ -52,7 +52,10 @@ class EvomanNEAT:
             if genome.fitness > self.max_fitness and genome.fitness > 0:
                 self.max_fitness = genome.fitness
                 self.fitnesses = fitnesses
-                with open(self.high_scores_dir + '/highest_genome({:.1f}_fitness).pk1'.format(genome.fitness),
+                numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}.txt', self.weights_from_genome(genome))
+                with open(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}.json', 'w') as output:
+                    output.write(str(self.fitnesses).replace('\'', '\"'))
+                with open(self.high_scores_dir + '/gen{}_genome{}({:.1f}_fitness).pk1'.format(self.gen, genome.key, genome.fitness),
                           'wb') as output:
                     pickle.dump(genome, output)
             sim += 1
