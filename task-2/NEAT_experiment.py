@@ -9,13 +9,13 @@ import NEAT_visualize
 headless = True
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
-number_of_rounds = 2
+number_of_rounds = 10
 experiments = [
     {
         "name": "NEAT-v1",
         "neat-config-file": "NEAT-configs/config-feedforward-1.txt",
         "enemies": [1, 2, 3],#, 4, 5, 6, 7, 8],
-        "number-of-generations": 20,
+        "number-of-generations": 30,
         "best-genome-test-quantity": 5,
         "enable-enemy-hint": False
     }
