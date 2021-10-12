@@ -46,15 +46,15 @@ class EvomanNEAT:
         sim = 0
         all_fitness = []
         for _, genome in genomes:
-            fitnesses = self.eval_genome(genome, enemies=self.enemies)
+            fitnesses, ind_gains = self.eval_genome(genome, enemies=self.enemies)
             genome.fitness = numpy.mean(list(fitnesses.values())) - numpy.std(list(fitnesses.values()))
             all_fitness.append(genome.fitness)
             if genome.fitness > self.max_fitness and genome.fitness > 0:
                 self.max_fitness = genome.fitness
                 self.fitnesses = fitnesses
-                numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}.txt', self.weights_from_genome(genome))
-                with open(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}.json', 'w') as output:
-                    output.write(str(self.fitnesses).replace('\'', '\"'))
+                numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_weights.txt', self.weights_from_genome(genome))
+                with open(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_ind_gains.json', 'w') as output:
+                    output.write(str(ind_gains).replace('\'', '\"'))
                 with open(self.high_scores_dir + '/gen{}_genome{}({:.1f}_fitness).pk1'.format(self.gen, genome.key, genome.fitness),
                           'wb') as output:
                     pickle.dump(genome, output)
@@ -81,11 +81,13 @@ class EvomanNEAT:
     def eval_genome(self, genome, enemies, env_speed='fastest'):
         # ff_network = neat.nn.FeedForwardNetwork.create(genome, config)
         fitnesses = {}
+        ind_gains = {}
         # play against all configured enemies with the same genome instance (generalist)
         for e in enemies:
-            f, p, _, t = self.make_env_for_enemy(e, env_speed).play(pcont=self.weights_from_genome(genome))
+            f, p_energy, e_energy, t = self.make_env_for_enemy(e, env_speed).play(pcont=self.weights_from_genome(genome))
             fitnesses[str(e)] = f
-        return fitnesses
+            ind_gains[str(e)] = p_energy - e_energy
+        return fitnesses, ind_gains
 
     def neat_config(self):
         return neat.Config(neat.DefaultGenome, neat.DefaultReproduction,

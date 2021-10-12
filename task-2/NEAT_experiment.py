@@ -65,7 +65,7 @@ class Experiment:
                 winner_of_winners["enemie_fitnesses"] = fitness
             fitnesses = []
             for _ in range(self.best_genome_test_qt):
-                eval_fitnesses = n.eval_genome(winner, self.enemies)
+                eval_fitnesses, _ = n.eval_genome(winner, self.enemies)
                 fitnesses.append(numpy.mean(list(eval_fitnesses.values())) - numpy.std(list(eval_fitnesses.values())))
 
 
