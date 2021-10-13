@@ -5,6 +5,7 @@ from NEAT_evoman_controller import NEATController
 from environment import Environment
 from archive.demo_controller import player_controller
 
+
 class EvomanNEAT:
 
     def __init__(self, neat_config, number_of_gens, experiment_env, enemies, enable_enemy_hint=False):
@@ -52,14 +53,16 @@ class EvomanNEAT:
             if genome.fitness > self.max_fitness and genome.fitness > 0:
                 self.max_fitness = genome.fitness
                 self.fitnesses = fitnesses
-                numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_weights.txt', self.weights_from_genome(genome))
+                numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_weights.txt',
+                              self.weights_from_genome(genome))
                 with open(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_ind_gains.json', 'w') as output:
                     output.write(str(ind_gains).replace('\'', '\"'))
-                with open(self.high_scores_dir + '/gen{}_genome{}({:.1f}_fitness).pk1'.format(self.gen, genome.key, genome.fitness),
+                with open(self.high_scores_dir + '/gen{}_genome{}({:.1f}_fitness).pk1'.format(self.gen, genome.key,
+                                                                                              genome.fitness),
                           'wb') as output:
                     pickle.dump(genome, output)
             sim += 1
-            print('Generation: {}, simulation: {}'.format(self.gen, sim))
+            print('Generation: {}, simulation: {}, fitness: {}'.format(self.gen, sim, genome.fitness))
         self.fitnesses_per_gen.append(all_fitness)
         NEAT_visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
 
@@ -84,8 +87,9 @@ class EvomanNEAT:
         ind_gains = {}
         # play against all configured enemies with the same genome instance (generalist)
         for e in enemies:
-            f, p_energy, e_energy, t = self.make_env_for_enemy(e, env_speed).play(pcont=self.weights_from_genome(genome))
-            fitnesses[str(e)] = f
+            f, p_energy, e_energy, t = self.make_env_for_enemy(e, env_speed).play(
+                pcont=self.weights_from_genome(genome))
+            fitnesses[str(e)] = ((p_energy - e_energy) + f) / 2
             ind_gains[str(e)] = p_energy - e_energy
         return fitnesses, ind_gains
 
@@ -96,7 +100,7 @@ class EvomanNEAT:
 
     def make_env_for_enemy(self, enemy, env_speed='fastest'):
         return Environment(experiment_name=self.experiment_env, speed=env_speed, playermode='ai', enemymode='static',
-                           player_controller=player_controller(_n_hidden=10), enemies=[enemy], logs='on',
+                           player_controller=player_controller(_n_hidden=10), enemies=[enemy], logs='off',
                            randomini='yes')
 
     def run(self):
