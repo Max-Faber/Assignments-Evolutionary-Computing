@@ -15,7 +15,7 @@ experiments = [
         "name": "NEAT-v1",
         "neat-config-file": "NEAT-configs/config-feedforward-1.txt",
         "enemies": [1, 2, 3],
-        "number-of-generations": 30,
+        "number-of-generations": 50,
         "best-genome-test-quantity": 5,
         "enable-enemy-hint": False
     }
