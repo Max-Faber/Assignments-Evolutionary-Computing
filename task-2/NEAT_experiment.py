@@ -68,7 +68,7 @@ class Experiment:
                 ind_gains = n.eval_genome(winner, self.enemies)
                 fitnesses.append(n.summarize_eval(ind_gains))
 
-            best_individual_mean_gain.append(numpy.mean(gain.values()))
+            best_individual_mean_gain.append(numpy.mean(list(gain.values())))
 
             for j in range(len(n.fitnesses_per_gen)):
                 gen_fitness = n.fitnesses_per_gen[j]
