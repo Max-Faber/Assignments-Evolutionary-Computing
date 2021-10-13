@@ -58,9 +58,9 @@ class Experiment:
                            enable_enemy_hint=self.enable_enemy_hint)
 
             winner, fitness = n.run()
-            mean_std_fitness = numpy.mean(n.summarize_eval(fitness))
-            if mean_std_fitness > winner_of_winners["fitness"]:
-                winner_of_winners["fitness"] = mean_std_fitness
+            summ_fitness = n.summarize_eval(fitness)
+            if summ_fitness > winner_of_winners["fitness"]:
+                winner_of_winners["fitness"] = summ_fitness
                 winner_of_winners["genome"] = winner
                 winner_of_winners["enemie_fitnesses"] = fitness
             fitnesses = []
