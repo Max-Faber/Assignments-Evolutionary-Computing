@@ -46,7 +46,7 @@ class Experiment:
         max_fitness_per_gen = [[] for _ in range(self.num_gens)]
         # per round the avg per gen [[10.4, 11.9, 9.9, ..., n-rounds], [...], ..., n-gens]
         avg_fitness_per_gen = [[] for _ in range(self.num_gens)]
-        best_individual_mean_fitnesses = []  # = avg fitness best genome each round -> [80.2, 72.3, ... n-rounds]
+        best_individual_mean_gain = []  # = avg fitness best genome each round -> [80.2, 72.3, ... n-rounds]
         winner_of_winners = {"genome": None, "fitness": -100, "enemie_fitnesses": {}}
         for i in range(number_of_rounds):
             enemy_round_env = self.base_env + "/round-" + str(i + 1)
@@ -57,18 +57,18 @@ class Experiment:
                            enemies=self.enemies,
                            enable_enemy_hint=self.enable_enemy_hint)
 
-            winner, fitness = n.run()
-            summ_fitness = n.summarize_eval(fitness)
+            winner, gain = n.run()
+            summ_fitness = n.summarize_eval(gain)
             if summ_fitness > winner_of_winners["fitness"]:
                 winner_of_winners["fitness"] = summ_fitness
                 winner_of_winners["genome"] = winner
-                winner_of_winners["enemie_fitnesses"] = fitness
+                winner_of_winners["enemie_fitnesses"] = gain
             fitnesses = []
             for _ in range(self.best_genome_test_qt):
                 ind_gains = n.eval_genome(winner, self.enemies)
                 fitnesses.append(n.summarize_eval(ind_gains))
 
-            best_individual_mean_fitnesses.append(sum(fitnesses) / len(fitnesses))
+            best_individual_mean_gain.append(numpy.mean(gain.values()))
 
             for j in range(len(n.fitnesses_per_gen)):
                 gen_fitness = n.fitnesses_per_gen[j]
@@ -84,8 +84,8 @@ class Experiment:
             output.write(str(winner_of_winners["enemie_fitnesses"]).replace('\'', '\"'))
 
         NEAT_visualize.plot_individual_avg_fitness(self.name,
-                                                   best_individual_mean_fitnesses,
-                                                   filename=enemy_graphs_env + '/best_individual_avg_fitness.svg')
+                                                   best_individual_mean_gain,
+                                                   filename=enemy_graphs_env + '/best_individual_avg_gain.svg')
         NEAT_visualize.plot_fitnesses(avg_fitness_per_gen, max_fitness_per_gen,
                                       filename=enemy_graphs_env + '/gen_fitnesses.svg')
 
