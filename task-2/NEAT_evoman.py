@@ -50,7 +50,7 @@ class EvomanNEAT:
             fitnesses, ind_gains = self.eval_genome(genome, enemies=self.enemies)
             genome.fitness = numpy.mean(list(fitnesses.values())) - numpy.std(list(fitnesses.values()))
             all_fitness.append(genome.fitness)
-            if genome.fitness > self.max_fitness and genome.fitness > 0:
+            if genome.fitness > self.max_fitness:
                 self.max_fitness = genome.fitness
                 self.fitnesses = fitnesses
                 numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_weights.txt',
