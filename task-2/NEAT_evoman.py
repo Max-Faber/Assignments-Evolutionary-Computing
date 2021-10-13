@@ -48,6 +48,7 @@ class EvomanNEAT:
         all_fitness = []
         for _, genome in genomes:
             fitnesses, ind_gains = self.eval_genome(genome, enemies=self.enemies)
+            num_wins = sum(i>0 for i in ind_gains.values())
             genome.fitness = numpy.mean(list(fitnesses.values())) - numpy.std(list(fitnesses.values()))
             all_fitness.append(genome.fitness)
             if genome.fitness > self.max_fitness:
@@ -62,7 +63,7 @@ class EvomanNEAT:
                           'wb') as output:
                     pickle.dump(genome, output)
             sim += 1
-            print('Generation: {}, simulation: {}, fitness: {}'.format(self.gen, sim, genome.fitness))
+            print('Generation: {}, simulation: {}, fitness: {}, wins: {}'.format(self.gen, sim, genome.fitness, num_wins))
         self.fitnesses_per_gen.append(all_fitness)
         NEAT_visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
 
