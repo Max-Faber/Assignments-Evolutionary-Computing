@@ -14,7 +14,7 @@ experiments = [
     {
         "name": "NEAT-v1",
         "neat-config-file": "NEAT-configs/config-feedforward-1.txt",
-        "enemies": [1, 6, 7,  8],
+        "enemies": [1, 2, 3],
         "number-of-generations": 30,
         "best-genome-test-quantity": 5,
         "enable-enemy-hint": False
@@ -47,7 +47,7 @@ class Experiment:
         # per round the avg per gen [[10.4, 11.9, 9.9, ..., n-rounds], [...], ..., n-gens]
         avg_fitness_per_gen = [[] for _ in range(self.num_gens)]
         best_individual_mean_fitnesses = []  # = avg fitness best genome each round -> [80.2, 72.3, ... n-rounds]
-        winner_of_winners = {"genome": None, "fitness": -100, "enemie_fitnesses": {} }
+        winner_of_winners = {"genome": None, "fitness": -100, "enemie_fitnesses": {}}
         for i in range(number_of_rounds):
             enemy_round_env = self.base_env + "/round-" + str(i + 1)
 
@@ -58,16 +58,15 @@ class Experiment:
                            enable_enemy_hint=self.enable_enemy_hint)
 
             winner, fitness = n.run()
-            mean_std_fitness = numpy.mean(list(fitness.values())) - numpy.std(list(fitness.values()))
+            mean_std_fitness = numpy.mean(n.summarize_eval(fitness))
             if mean_std_fitness > winner_of_winners["fitness"]:
                 winner_of_winners["fitness"] = mean_std_fitness
                 winner_of_winners["genome"] = winner
                 winner_of_winners["enemie_fitnesses"] = fitness
             fitnesses = []
             for _ in range(self.best_genome_test_qt):
-                eval_fitnesses, _ = n.eval_genome(winner, self.enemies)
-                fitnesses.append(numpy.mean(list(eval_fitnesses.values())) - numpy.std(list(eval_fitnesses.values())))
-
+                ind_gains = n.eval_genome(winner, self.enemies)
+                fitnesses.append(n.summarize_eval(ind_gains))
 
             best_individual_mean_fitnesses.append(sum(fitnesses) / len(fitnesses))
 
@@ -93,7 +92,7 @@ class Experiment:
 
 if __name__ == '__main__':
     args = sys.argv
-    print (args)
+    print(args)
     if len(args) == 0:
         warnings.warn("No experiment names were given. Assuming all experiments have to be performed...")
         warnings.warn("You can run specific experiments by calling 'python [name_of_file.py] exp_1 exp_2 exp_3'.")

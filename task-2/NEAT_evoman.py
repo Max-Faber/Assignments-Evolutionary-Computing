@@ -47,13 +47,13 @@ class EvomanNEAT:
         sim = 0
         all_fitness = []
         for _, genome in genomes:
-            fitnesses, ind_gains = self.eval_genome(genome, enemies=self.enemies)
-            num_wins = sum(i>0 for i in ind_gains.values())
-            genome.fitness = numpy.mean(list(fitnesses.values())) - numpy.std(list(fitnesses.values()))
+            ind_gains = self.eval_genome(genome, enemies=self.enemies)
+            num_wins = sum(i > 0 for i in ind_gains.values())
+            genome.fitness = self.summarize_eval(ind_gains)
             all_fitness.append(genome.fitness)
             if genome.fitness > self.max_fitness:
                 self.max_fitness = genome.fitness
-                self.fitnesses = fitnesses
+                self.fitnesses = ind_gains
                 numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_weights.txt',
                               self.weights_from_genome(genome))
                 with open(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_ind_gains.json', 'w') as output:
@@ -63,7 +63,8 @@ class EvomanNEAT:
                           'wb') as output:
                     pickle.dump(genome, output)
             sim += 1
-            print('Generation: {}, simulation: {}, fitness: {}, wins: {}'.format(self.gen, sim, genome.fitness, num_wins))
+            print(
+                'Generation: {}, simulation: {}, fitness: {}, wins: {}'.format(self.gen, sim, genome.fitness, num_wins))
         self.fitnesses_per_gen.append(all_fitness)
         NEAT_visualize.plot_stats(self.stats, ylog=False, view=False, filename=self.graphs_dir + '/avg_fitness.svg')
 
@@ -84,15 +85,18 @@ class EvomanNEAT:
 
     def eval_genome(self, genome, enemies, env_speed='fastest'):
         # ff_network = neat.nn.FeedForwardNetwork.create(genome, config)
-        fitnesses = {}
         ind_gains = {}
         # play against all configured enemies with the same genome instance (generalist)
         for e in enemies:
             f, p_energy, e_energy, t = self.make_env_for_enemy(e, env_speed).play(
                 pcont=self.weights_from_genome(genome))
-            fitnesses[str(e)] = ((p_energy - e_energy) + f) / 2
             ind_gains[str(e)] = p_energy - e_energy
-        return fitnesses, ind_gains
+        return ind_gains
+
+    @staticmethod
+    def summarize_eval(individual_gains):
+        won_games = sum(i > 0 for i in individual_gains.values())
+        return won_games + (sum(list(individual_gains.values())) / 100)
 
     def neat_config(self):
         return neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
