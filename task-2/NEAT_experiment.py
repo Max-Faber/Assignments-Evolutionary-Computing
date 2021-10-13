@@ -9,7 +9,7 @@ import NEAT_visualize
 headless = True
 if headless:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
-number_of_rounds = 2
+number_of_rounds = 10
 experiments = [
     {
         "name": "NEAT-v1",
