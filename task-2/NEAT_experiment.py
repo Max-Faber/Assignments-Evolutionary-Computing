@@ -17,7 +17,15 @@ experiments = [
         "enemies": [1, 2, 3],
         "number-of-generations": 50,
         "best-genome-test-quantity": 5,
-        "enable-enemy-hint": False
+        "enable-enemy-hint": False  # todo: when false input_size must be 20, else 21
+    },
+    {
+        "name": "NEAT-v1",
+        "neat-config-file": "NEAT-configs/config-feedforward-2.txt",
+        "enemies": [1, 2, 3],
+        "number-of-generations": 50,
+        "best-genome-test-quantity": 5,
+        "enable-enemy-hint": True  # todo: when false input_size must be 20, else 21
     }
 ]
 
@@ -88,7 +96,6 @@ class Experiment:
                                                    filename=enemy_graphs_env + '/best_individual_avg_gain.svg')
         NEAT_visualize.plot_fitnesses(avg_fitness_per_gen, max_fitness_per_gen,
                                       filename=enemy_graphs_env + '/gen_fitnesses.svg')
-
 
 
 if __name__ == '__main__':

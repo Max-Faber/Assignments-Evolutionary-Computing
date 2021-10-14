@@ -47,15 +47,16 @@ class EvomanNEAT:
         sim = 0
         all_fitness = []
         for _, genome in genomes:
-            ind_gains = self.eval_genome(genome, enemies=self.enemies)
+            ind_gains = self.eval_genome(genome, self.enemies, cfg)
             num_wins = sum(i > 0 for i in ind_gains.values())
             genome.fitness = self.summarize_eval(ind_gains)
             all_fitness.append(genome.fitness)
             if genome.fitness > self.max_fitness:
                 self.max_fitness = genome.fitness
                 self.fitnesses = ind_gains
-                numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_weights.txt',
-                              self.weights_from_genome(genome))
+                if not self.enable_enemy_hint:
+                    numpy.savetxt(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_weights.txt',
+                                  self.weights_from_genome(genome))
                 with open(self.high_scores_dir + f'/gen{self.gen}_genome{genome.key}_ind_gains.json', 'w') as output:
                     output.write(str(ind_gains).replace('\'', '\"'))
                 with open(self.high_scores_dir + '/gen{}_genome{}({:.1f}_fitness).pk1'.format(self.gen, genome.key,
@@ -83,13 +84,20 @@ class EvomanNEAT:
             weights[(i + 10) if (i + 10) <= 209 else (i + 10) + 5] = c.weight
         return numpy.array(weights)
 
-    def eval_genome(self, genome, enemies, env_speed='fastest'):
+    def eval_genome(self, genome, enemies, cfg, env_speed='fastest'):
         # ff_network = neat.nn.FeedForwardNetwork.create(genome, config)
         ind_gains = {}
         # play against all configured enemies with the same genome instance (generalist)
         for e in enemies:
-            f, p_energy, e_energy, t = self.make_env_for_enemy(e, env_speed).play(
-                pcont=self.weights_from_genome(genome))
+            if not self.enable_enemy_hint:
+                controller = player_controller(_n_hidden=10)
+                f, p_energy, e_energy, t = self.make_env_for_enemy(e, controller, env_speed).play(
+                    pcont=self.weights_from_genome(genome))
+            else:
+                controller = NEATController(e, neat.nn.FeedForwardNetwork.create(genome, cfg))
+                f, p_energy, e_energy, t = self.make_env_for_enemy(e, controller, env_speed).play(
+                    pcont=controller
+                )
             ind_gains[str(e)] = p_energy - e_energy
         return ind_gains
 
@@ -103,9 +111,9 @@ class EvomanNEAT:
                            neat.DefaultSpeciesSet, neat.DefaultStagnation,
                            self.neat_config_file)
 
-    def make_env_for_enemy(self, enemy, env_speed='fastest'):
+    def make_env_for_enemy(self, enemy, controller, env_speed='fastest'):
         return Environment(experiment_name=self.experiment_env, speed=env_speed, playermode='ai', enemymode='static',
-                           player_controller=player_controller(_n_hidden=10), enemies=[enemy], logs='off',
+                           player_controller=controller, enemies=[enemy], logs='off',
                            randomini='yes')
 
     def run(self):
