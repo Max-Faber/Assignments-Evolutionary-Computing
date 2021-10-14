@@ -73,7 +73,7 @@ class Experiment:
                 winner_of_winners["enemie_fitnesses"] = gain
             fitnesses = []
             for _ in range(self.best_genome_test_qt):
-                ind_gains = n.eval_genome(winner, self.enemies)
+                ind_gains = n.eval_genome(winner, self.enemies, n.neat_config())
                 fitnesses.append(n.summarize_eval(ind_gains))
 
             best_individual_mean_gain.append(numpy.mean(list(gain.values())))
