@@ -20,7 +20,7 @@ experiments = [
         "enable-enemy-hint": False  # todo: when false input_size must be 20, else 21
     },
     {
-        "name": "NEAT-v1",
+        "name": "NEAT-v2",
         "neat-config-file": "NEAT-configs/config-feedforward-2.txt",
         "enemies": [1, 2, 3],
         "number-of-generations": 50,
