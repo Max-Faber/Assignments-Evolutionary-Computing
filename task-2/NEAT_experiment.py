@@ -87,7 +87,8 @@ class Experiment:
         with open(winner_name + ".pk1", 'wb') as output:
             pickle.dump(winner_of_winners["genome"], output)
 
-        numpy.savetxt(winner_name + 'weights.txt', NEATController.weights_from_genome(winner_of_winners["genome"]))
+        if not self.enable_enemy_hint:
+            numpy.savetxt(winner_name + 'weights.txt', EvomanNEAT.weights_from_genome(winner_of_winners["genome"]))
         with open(winner_name + 'enemie_fitnesses.json', 'w') as output:
             output.write(str(winner_of_winners["enemie_fitnesses"]).replace('\'', '\"'))
 
