@@ -3,7 +3,8 @@ from __future__ import print_function
 import copy
 import warnings
 
-import graphviz
+import graphviz, matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import statistics
