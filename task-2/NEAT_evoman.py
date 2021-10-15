@@ -93,7 +93,7 @@ class EvomanNEAT:
             controller = player_controller(_n_hidden=10) if not self.enable_enemy_hint else NEATController(e,
                                                                         neat.nn.FeedForwardNetwork.create(genome, cfg))
             f, p_energy, e_energy, t = self.make_env_for_enemy(e, controller, env_speed).play(
-                                                               pcont=self.weights_from_genome(genome, True))
+                                                               pcont=self.weights_from_genome(genome, self.enable_enemy_hint))
             ind_gains[str(e)] = p_energy - e_energy
         return ind_gains
 
