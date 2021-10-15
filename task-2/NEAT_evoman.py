@@ -75,13 +75,14 @@ class EvomanNEAT:
     # bias2:    210 t/m 214 ->   5 weights
     # weights2: 215 t/m 264 ->  50 weights
     @staticmethod
-    def weights_from_genome(genome):
-        weights = [None] * 265  # NN has 265 weights in total
+    def weights_from_genome(genome, enemy_hint = False):
+        extra_wheights = 10 if enemy_hint else 0
+        weights = [None] * (265 + extra_wheights)  # NN has 265 weights in total
 
         for i, n in enumerate(genome.nodes.values()):
-            weights[i if i <= 9 else i + 210 - 10] = n.bias
+            weights[i if i <= 9 else i + (210 + extra_wheights) - 10] = n.bias
         for i, c in enumerate(genome.connections.values()):
-            weights[(i + 10) if (i + 10) <= 209 else (i + 10) + 5] = c.weight
+            weights[(i + 10) if (i + 10) <= (209 + extra_wheights) else (i + 10) + 5] = c.weight
         return numpy.array(weights)
 
     def eval_genome(self, genome, enemies, cfg, env_speed='fastest'):
@@ -89,15 +90,10 @@ class EvomanNEAT:
         ind_gains = {}
         # play against all configured enemies with the same genome instance (generalist)
         for e in enemies:
-            if not self.enable_enemy_hint:
-                controller = player_controller(_n_hidden=10)
-                f, p_energy, e_energy, t = self.make_env_for_enemy(e, controller, env_speed).play(
-                    pcont=self.weights_from_genome(genome))
-            else:
-                controller = NEATController(e, neat.nn.FeedForwardNetwork.create(genome, cfg))
-                f, p_energy, e_energy, t = self.make_env_for_enemy(e, controller, env_speed).play(
-                    pcont=controller
-                )
+            controller = player_controller(_n_hidden=10) if not self.enable_enemy_hint else NEATController(e,
+                                                                        neat.nn.FeedForwardNetwork.create(genome, cfg))
+            f, p_energy, e_energy, t = self.make_env_for_enemy(e, controller, env_speed).play(
+                                                               pcont=self.weights_from_genome(genome, True))
             ind_gains[str(e)] = p_energy - e_energy
         return ind_gains
 
