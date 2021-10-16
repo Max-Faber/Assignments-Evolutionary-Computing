@@ -3,10 +3,8 @@ import sys, numpy as np
 sys.path.insert(0, 'evoman')
 from controller import Controller
 
-
 class NEATController(Controller):
-    def __init__(self, enemy_hint, ff_network):
-        self.ffNetwork = ff_network
+    def __init__(self, enemy_hint):
         self.enemy_hint = enemy_hint
         self.n_hidden = [10]
         pass
@@ -37,12 +35,6 @@ class NEATController(Controller):
         # Outputting activated second layer. Each entry in the output is an action
         output = NEATController.sigmoid_activation(output1.dot(weights2) + bias2)[0]
 
-
-        # Normalises the input using min-max scaling
-        # inputs = np.append(inputs, controller.enemy_hint)
-        # inputs = (inputs - min(inputs)) / float((max(inputs) - min(inputs)))
-        # output = controller.ffNetwork.activate(inputs)
-        #
         # takes decisions about sprite actions (sigmoid activations so 0.5 boundary)
         left = 1 if output[0] > 0.5 else 0
         right = 1 if output[1] > 0.5 else 0
