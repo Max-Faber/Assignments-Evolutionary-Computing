@@ -105,19 +105,39 @@ class IndividualComparer:
 if __name__ == '__main__':
     final_results           = 'NEAT-final-results'
     results_base_path       = f'{final_results}/Comparisons'
-    enemies                 = [6, 7, 8]
+    enemies                 = [1, 2, 3, 4, 5, 6, 7, 8]
     test_quantity           = 5 # Number of games of which the mean will be taken
     individuals_to_compare  = []
 
-    # Enemies 6, 7, 8
-    individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/v1/NEAT-v1-15_10_2021_09_01_39',
+    # Enemies 1, 2, 3
+    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/v1/NEAT-v1-14_10_2021_17_08_32',
+    #                                              enemies=enemies,
+    #                                              name='NEAT-v1_enemies_1_2_3',
+    #                                              enable_enemy_hint=False))
+    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/v2/NEAT-v2-16_10_2021_08_44_36',
+    #                                              enemies=enemies,
+    #                                              name='NEAT-v2_enemies_1_2_3',
+    #                                              enable_enemy_hint=True))
+
+    # Enemies 4, 5, 8
+    individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/v1/NEAT-v1-16_10_2021_01_28_09',
                                                  enemies=enemies,
-                                                 name='NEAT-v1',
+                                                 name='NEAT-v1_enemies_4_5_8',
                                                  enable_enemy_hint=False))
-    individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/v2/NEAT-v2-15_10_2021_17_34_09',
+    individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/v2/NEAT-v2-16_10_2021_01_27_33',
                                                  enemies=enemies,
-                                                 name='NEAT-v2',
+                                                 name='NEAT-v2_enemies_4_5_8',
                                                  enable_enemy_hint=True))
+
+    # Enemies 6, 7, 8
+    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/v1/NEAT-v1-15_10_2021_09_01_39',
+    #                                              enemies=enemies,
+    #                                              name='NEAT-v1_enemies_6_7_8',
+    #                                              enable_enemy_hint=False))
+    # individuals_to_compare.append(ExperimentNEAT(base_path=f'{final_results}/v2/NEAT-v2-15_10_2021_17_34_09',
+    #                                              enemies=enemies,
+    #                                              name='NEAT-v2_enemies_6_7_8',
+    #                                              enable_enemy_hint=True))
 
     IndividualComparer(enemies=enemies,
                        individuals_to_compare=individuals_to_compare,
