@@ -87,7 +87,7 @@ class EvomanNEAT:
         # play against all configured enemies with the same genome instance (generalist)
         for e in enemies:
             controller = player_controller(_n_hidden=10) if not self.enable_enemy_hint \
-                else NEATController(self.enable_enemy_hint)
+                else NEATController(e)
             f, p_energy, e_energy, t = self.make_env_for_enemy(e, controller, env_speed).play(
                 pcont=self.weights_from_genome(genome, self.enable_enemy_hint))
             ind_gains[str(e)] = p_energy - e_energy
